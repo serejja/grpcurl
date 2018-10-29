@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -281,6 +282,10 @@ func (h *DefaultEventHandler) OnReceiveResponse(resp proto.Message) {
 	if respStr, err := h.formatter(resp); err != nil {
 		fmt.Fprintf(h.out, "Failed to format response message %d: %v\n", h.NumResponses, err)
 	} else {
+		if rw, ok := h.out.(http.ResponseWriter); ok {
+			rw.Header().Set("Content-Type", "application/json")
+		}
+
 		fmt.Fprintln(h.out, respStr)
 	}
 }
